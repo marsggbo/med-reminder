@@ -1,0 +1,43 @@
+<view class="page-title">设置</view>
+<view class="page-sub">数据存在微信云开发，登录同一微信号即可跨设备同步</view>
+
+<view class="card block">
+  <view class="form-row">
+    <view class="form-label">药品数量</view>
+    <view class="set-value">{{medCount}} 个</view>
+  </view>
+  <view class="form-row">
+    <view class="form-label">打卡记录</view>
+    <view class="set-value">{{logCount}} 条</view>
+  </view>
+  <view class="form-row">
+    <view class="form-label">数据同步</view>
+    <view class="set-value">{{syncText}}</view>
+  </view>
+</view>
+
+<view style="margin:16rpx 24rpx">
+  <button class="btn-primary" catchtap="syncNow">立即同步</button>
+</view>
+
+<view class="section-title">换手机 / 换设备</view>
+<view class="card block">
+  <view class="hint-text">1. 新手机安装微信，登录同一个微信号；</view>
+  <view class="hint-text">2. 打开这个小程序（可从聊天记录或「微信 → 发现 → 小程序」进入）；</view>
+  <view class="hint-text">3. 首次打开会自动从云端拉回你的全部药品和打卡记录。</view>
+</view>
+
+<view class="section-title">说明</view>
+<view class="card block">
+  <view class="hint-text">
+    小程序版仅做用药打卡与记录同步，不含 OCR 识别、无系统级通知提醒功能。
+    数据以微信 openid 隔离，仅你自己可见；使用微信云开发免费额度，无需服务器。
+  </view>
+</view>
+
+<view class="nav-bar">
+  <view class="nav-item" data-url="/pages/today/today" catchtap="goTab"><text class="nav-icon">🏠</text>今日</view>
+  <view class="nav-item" data-url="/pages/calendar/calendar" catchtap="goTab"><text class="nav-icon">📅</text>日历</view>
+  <view class="nav-item" data-url="/pages/meds/meds" catchtap="goTab"><text class="nav-icon">💊</text>药品</view>
+  <view class="nav-item active"><text class="nav-icon">⚙️</text>设置</view>
+</view>

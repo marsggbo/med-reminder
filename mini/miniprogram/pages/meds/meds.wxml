@@ -1,0 +1,105 @@
+<view class="page-title">药品</view>
+<view class="page-sub">添加药品后，今日/日历会自动生成服药任务</view>
+
+<block wx:if="{{meds.length === 0 && !editing}}">
+  <view class="card">
+    <view class="empty">
+      <view class="empty-icon">💊</view>
+      <view>还没有药品</view>
+      <view class="empty-hint">点下方「＋ 添加药品」开始</view>
+    </view>
+  </view>
+</block>
+
+<view class="card block" wx:for="{{meds}}" wx:key="id" wx:for-item="m">
+  <view class="dose-item" style="border:none;padding:12rpx 0">
+    <view class="med-icon" style="font-size:44rpx;margin-right:8rpx">💊</view>
+    <view class="dose-info">
+      <view class="dose-name">{{m.name}}
+        <text class="med-state {{m.status === 'stopped' ? 'off' : ''}}">{{m.status === 'active' ? '服用中' : '已停用'}}</text>
+      </view>
+      <view class="dose-detail">{{m.dosePerTime}}{{m.doseUnit}} · {{m.timesPerDay}}次/天
+        · {{m.scheduleTimesText}}</view>
+      <view class="dose-detail" wx:if="{{m.status === 'active'}}">开始 {{m.startDate}} · 疗程 {{m.durationDays}}天</view>
+    </view>
+    <view class="med-actions">
+      <view class="btn-plain" style="padding:8rpx 20rpx;font-size:24rpx;border-radius:10rpx" data-id="{{m.id}}" catchtap="editMed">编辑</view>
+    </view>
+  </view>
+</view>
+
+<!-- 编辑/新增表单 -->
+<view class="card block" wx:if="{{editing}}">
+  <view class="form-row">
+    <view class="form-label">药品名称</view>
+    <view class="form-value"><input class="form-input" placeholder="如 阿莫西林胶囊" value="{{form.name}}" data-field="name" bindinput="onInput" /></view>
+  </view>
+  <view class="form-row">
+    <view class="form-label">每次剂量</view>
+    <view class="form-value">
+      <input class="input-inline" style="width:120rpx" type="number" value="{{form.dosePerTime}}" data-field="dosePerTime" bindinput="onInput" />
+      <input class="input-inline" style="width:160rpx" placeholder="粒/片/毫升" value="{{form.doseUnit}}" data-field="doseUnit" bindinput="onInput" />
+    </view>
+  </view>
+  <view class="form-row">
+    <view class="form-label">每天次数</view>
+    <view class="form-value">
+      <picker mode="selector" range="{{timesRange}}" value="{{timesIdx}}" bindchange="onTimesChange">
+        <view class="input-inline">{{f.timesPerDay}} 次/天 ▾</view>
+      </picker>
+    </view>
+  </view>
+  <view class="form-row">
+    <view class="form-label">服药时间</view>
+    <view class="form-value" style="flex-direction:column;align-items:flex-end;gap:8rpx">
+      <view wx:for="{{f.scheduleTimes}}" wx:key="index" style="display:flex;align-items:center;gap:12rpx">
+        <picker mode="time" value="{{item}}" data-idx="{{index}}" bindchange="onTimeChange">
+          <view class="input-inline">{{item}} ▾</view>
+        </picker>
+        <view style="color:#ff3b30;padding:0 8rpx" data-idx="{{index}}" catchtap="removeTime">✕</view>
+      </view>
+      <view>
+        <view class="btn-plain" style="padding:8rpx 24rpx;font-size:24rpx;border-radius:10rpx" catchtap="addTime">＋ 添加一组</view>
+      </view>
+    </view>
+  </view>
+  <view class="form-row">
+    <view class="form-label">开始日期</view>
+    <view class="form-value">
+      <picker mode="date" value="{{f.startDate}}" bindchange="onStartDate">
+        <view class="input-inline">{{f.startDate}} ▾</view>
+      </picker>
+    </view>
+  </view>
+  <view class="form-row">
+    <view class="form-label">疗程(天)</view>
+    <view class="form-value">
+      <input class="input-inline" style="width:140rpx" type="number" value="{{f.durationDays}}" data-field="durationDays" bindinput="onInput" />
+    </view>
+  </view>
+  <view class="form-row">
+    <view class="form-label">备注/用法</view>
+    <view class="form-value"><input class="form-input" placeholder="如 饭后服用" value="{{f.instructions}}" data-field="instructions" bindinput="onInput" /></view>
+  </view>
+
+  <view style="display:flex;gap:16rpx;margin-top:20rpx">
+    <button class="btn-plain" style="flex:1" catchtap="cancelEdit">取消</button>
+    <button class="btn-primary" style="flex:2" disabled="{{!canSave}}" catchtap="saveMed">保存</button>
+  </view>
+  <view wx:if="{{editingId}}" style="margin-top:20rpx">
+    <button class="btn-plain" style="color:#ff3b30" catchtap="toggleStatus">
+      {{f.status === 'active' ? '设为停用（不再生成任务）' : '重新启用'}}
+    </button>
+  </view>
+</view>
+
+<view style="margin:16rpx 24rpx">
+  <button class="btn-primary" wx:if="{{!editing}}" catchtap="newMed">＋ 添加药品</button>
+</view>
+
+<view class="nav-bar">
+  <view class="nav-item" data-url="/pages/today/today" catchtap="goTab"><text class="nav-icon">🏠</text>今日</view>
+  <view class="nav-item" data-url="/pages/calendar/calendar" catchtap="goTab"><text class="nav-icon">📅</text>日历</view>
+  <view class="nav-item active"><text class="nav-icon">💊</text>药品</view>
+  <view class="nav-item" data-url="/pages/settings/settings" catchtap="goTab"><text class="nav-icon">⚙️</text>设置</view>
+</view>

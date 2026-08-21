@@ -1,0 +1,56 @@
+<view class="cal-head">
+  <view class="cal-btn" data-off="-1" catchtap="shiftMonth">‹</view>
+  <view class="cal-title">{{title}}</view>
+  <view class="cal-btn" data-off="1" catchtap="shiftMonth">›</view>
+</view>
+
+<view class="card">
+  <view class="cal-grid">
+    <view class="cal-cell" wx:for="{{week}}">周{{item}}</view>
+  </view>
+  <view class="cal-grid" style="padding-top:0">
+    <view
+      class="cal-cell {{item.inMonth ? '' : 'dim'}} {{item.isToday ? 'today' : ''}} {{item.isSel ? 'sel' : ''}}"
+      wx:for="{{cells}}" wx:key="key"
+      data-date="{{item.date}}"
+      catchtap="selectDate">
+      <view class="cal-day">{{item.day}}</view>
+      <view class="cal-dot" wx:if="{{item.done > 0}}"></view>
+      <view class="cal-count" wx:if="{{item.done > 0}}">{{item.done}}/{{item.total}}</view>
+    </view>
+  </view>
+</view>
+
+<view class="page-sub" style="padding: 24rpx 32rpx 4rpx">{{selectedLabel}}</view>
+<block wx:if="{{segments.length === 0}}">
+  <view class="card"><view class="empty">该日无服药任务</view></view>
+</block>
+<block wx:for="{{segments}}" wx:key="seg" wx:for-item="seg">
+  <view class="segment-bar">{{seg.seg}}</view>
+  <view class="card" style="padding: 4rpx 28rpx">
+    <view class="dose-item" wx:for="{{seg.tasks}}" wx:key="key" wx:for-item="t">
+      <button
+        class="dose-check {{t.taken ? 'taken' : ''}}"
+        data-medid="{{t.medId}}"
+        data-time="{{t.time}}"
+        catchtap="toggleTask">✓</button>
+      <view class="dose-info">
+        <view class="dose-name">{{t.medName}}</view>
+        <view class="dose-detail">{{t.doseText}}</view>
+      </view>
+      <view class="dose-right">
+        <view class="dose-time">{{t.time}}</view>
+        <view class="dose-taken" wx:if="{{t.takenClock}}">已服 {{t.takenClock}}</view>
+        <view class="dose-taken" wx:elif="{{t.isPast}}">未服</view>
+        <view class="dose-taken" wx:else>待服</view>
+      </view>
+    </view>
+  </view>
+</block>
+
+<view class="nav-bar">
+  <view class="nav-item" data-url="/pages/today/today" catchtap="goTab"><text class="nav-icon">🏠</text>今日</view>
+  <view class="nav-item active"><text class="nav-icon">📅</text>日历</view>
+  <view class="nav-item" data-url="/pages/meds/meds" catchtap="goTab"><text class="nav-icon">💊</text>药品</view>
+  <view class="nav-item" data-url="/pages/settings/settings" catchtap="goTab"><text class="nav-icon">⚙️</text>设置</view>
+</view>

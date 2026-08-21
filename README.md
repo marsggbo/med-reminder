@@ -25,9 +25,11 @@ An offline-first medication reminder PWA, packaged as an Android APK, with fully
 
 ## 📲 安装 / Install
 
-在 [Releases](https://github.com/marsggbo/med-reminder/releases) 下载 `med-reminder-v1.0.1.apk`,传到 Android 手机安装即可(调试签名版)。
-
-> Download `med-reminder-v1.0.1.apk` from **Releases** and sideload it on your Android phone.
+- **Android APK**: 在 [Releases](https://github.com/marsggbo/med-reminder/releases) 下载 `med-reminder-v1.0.1.apk`,传到 Android 手机安装即可(调试签名版)。
+  > Download `med-reminder-v1.0.1.apk` from **Releases** and sideload it on your Android phone.
+- **微信小程序**: `mini/` 目录是轻量版(今日打卡 + 日历 + 云同步,无 OCR/无系统通知),
+  用微信开发者工具导入并开通云开发即可,数据按微信号隔离、换机不丢。
+  部署步骤见 [mini/README.md](mini/README.md)。
 
 ## 🏗️ 从源码构建 / Build from Source
 

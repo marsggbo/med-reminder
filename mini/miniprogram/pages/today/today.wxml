@@ -1,0 +1,41 @@
+<view class="page-title">今日打卡</view>
+<view class="page-sub">{{dateLabel}} · 与微信账号云同步</view>
+
+<block wx:if="{{segments.length === 0 && !loading}}">
+  <view class="card">
+    <view class="empty">
+      <view class="empty-icon">💊</view>
+      <view>今日暂无服药任务</view>
+      <view class="empty-hint">去「药品」页添加第一个药品</view>
+    </view>
+  </view>
+</block>
+
+<block wx:for="{{segments}}" wx:key="seg" wx:for-item="seg">
+  <view class="segment-bar">{{seg.seg}}</view>
+  <view class="card" style="padding: 4rpx 28rpx">
+    <view class="dose-item" wx:for="{{seg.tasks}}" wx:key="key" wx:for-item="task">
+      <button
+        class="dose-check {{task.taken ? 'taken' : ''}}"
+        data-medid="{{task.medId}}"
+        data-time="{{task.time}}"
+        catchtap="onTake">✓</button>
+      <view class="dose-info">
+        <view class="dose-name">{{task.medName}}</view>
+        <view class="dose-detail">{{task.doseText}}</view>
+      </view>
+      <view class="dose-right">
+        <view class="dose-time">{{task.time}}</view>
+        <view class="dose-taken" wx:if="{{task.takenClock}}">已服 {{task.takenClock}}</view>
+        <view class="dose-taken" wx:else>未服</view>
+      </view>
+    </view>
+  </view>
+</block>
+
+<view class="nav-bar">
+  <view class="nav-item active"><text class="nav-icon">🏠</text>今日</view>
+  <view class="nav-item" data-url="/pages/calendar/calendar" catchtap="goTab"><text class="nav-icon">📅</text>日历</view>
+  <view class="nav-item" data-url="/pages/meds/meds" catchtap="goTab"><text class="nav-icon">💊</text>药品</view>
+  <view class="nav-item" data-url="/pages/settings/settings" catchtap="goTab"><text class="nav-icon">⚙️</text>设置</view>
+</view>
