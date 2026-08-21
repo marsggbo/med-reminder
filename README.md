@@ -15,6 +15,7 @@ An offline-first medication reminder PWA, packaged as an Android APK, with fully
 | 🇨🇳 中文 | 🇬🇧 English |
 |---|---|
 | 📅 今日打卡 + 日历视图(上午/下午/晚上分段) | Daily check-in + segmented calendar view |
+| ✏️ 每次服药时间可单独修改,打卡后显示实际服用时刻 | Per-dose time editable; check-in shows real taken time |
 | 💊 药品管理:剂量、频次、疗程、库存、保质期 | Medication management: dose, frequency, course, stock & expiry |
 | ⏰ 本地通知:到点未打卡才提醒,打卡后自动取消 | Local notifications only for un-taken doses — never after check-in |
 | 📷 拍照识别说明书(PP-OCRv3,全部本机运行) | Photo OCR of leaflets (PP-OCRv3, 100% on-device) |
@@ -24,9 +25,9 @@ An offline-first medication reminder PWA, packaged as an Android APK, with fully
 
 ## 📲 安装 / Install
 
-在 [Releases](https://github.com/marsggbo/med-reminder/releases) 下载 `med-reminder-v1.0.apk`,传到 Android 手机安装即可(调试签名版)。
+在 [Releases](https://github.com/marsggbo/med-reminder/releases) 下载 `med-reminder-v1.0.1.apk`,传到 Android 手机安装即可(调试签名版)。
 
-> Download `med-reminder-v1.0.apk` from **Releases** and sideload it on your Android phone.
+> Download `med-reminder-v1.0.1.apk` from **Releases** and sideload it on your Android phone.
 
 ## 🏗️ 从源码构建 / Build from Source
 

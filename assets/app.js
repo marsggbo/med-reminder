@@ -108,10 +108,29 @@ window.App = (function () {
     return html;
   }
 
+  function fmtClock(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return '';
+    var h = d.getHours(), m = d.getMinutes();
+    return (h < 10 ? '0' + h : '' + h) + ':' + (m < 10 ? '0' + m : '' + m);
+  }
+
   function renderDoseItem(log, med, status, withSegment) {
     var icon = status === 'taken' ? '✓' : status === 'missed' ? '✗' : '';
-    var timeLabel = log.scheduledTime;
-    if (withSegment) timeLabel = Utils.segmentOfTime(timeLabel) + ' ' + timeLabel;
+    var segPrefix = withSegment ? Utils.segmentOfTime(log.scheduledTime) + ' ' : '';
+    var timeHtml;
+    if (status === 'taken') {
+      // 已打卡:展示计划时间 + 实际打卡时刻,便于判断下一剂的间隔
+      timeHtml = '<div class="dose-time">'
+        + '<span class="dose-time-plan">' + segPrefix + log.scheduledTime + '</span>'
+        + (log.takenAt ? '<span class="dose-taken-at">已服 ' + fmtClock(log.takenAt) + '</span>' : '')
+        + '</div>';
+    } else {
+      // 未打卡:时间本身可直接编辑(系统时间选择器),改完自动重新分段/重排通知
+      timeHtml = '<input type="time" class="dose-time-input" value="' + log.scheduledTime
+        + '" data-log-id="' + log.id + '" aria-label="修改服药时间">';
+    }
     return '<div class="dose-item">'
       + '<button class="dose-check ' + status + '" data-action="take-dose" data-log-id="' + log.id + '">' + icon + '</button>'
       + '<div class="dose-info">'
@@ -119,7 +138,7 @@ window.App = (function () {
       + '<div class="dose-detail">' + med.dosePerTime + med.doseUnit
       + (med.instructions ? ' · ' + med.instructions : '') + '</div>'
       + '</div>'
-      + '<div class="dose-time">' + timeLabel + '</div>'
+      + timeHtml
       + '</div>';
   }
 
@@ -927,8 +946,24 @@ window.App = (function () {
   }
 
   // ── Init ───────────────────────────────────────────────────────────────────
+  // 今日/日历中单个服药任务的时间修改（input[type=time] 变更即保存）。
+  // 只改这一条日志，不影响药品的默认时间表；改完重新渲染并按新时间重排通知。
+  function handleDoseTimeChange(e) {
+    var input = e.target;
+    if (!input || !input.classList.contains('dose-time-input')) return;
+    var logId = input.getAttribute('data-log-id');
+    var v = input.value;
+    if (!logId || !/^([01]\d|2[0-3]):[0-5]\d$/.test(v)) return;
+    var log = Store.getLog(logId);
+    if (!log || log.scheduledTime === v) return;
+    Store.updateLog(logId, { scheduledTime: v });
+    renderView(currentView);
+    if (Store.getSettings().notifyEnabled) scheduleTodayNotifications();
+  }
+
   function init() {
     document.addEventListener('click', handleClick);
+    document.addEventListener('change', handleDoseTimeChange);
     bindPhotoInput();
     bindOverlays();
     bindScanInput();
