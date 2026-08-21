@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>吃药提醒</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+                   "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+  </style>
+  <link rel="stylesheet" href="./assets/style.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- ── TODAY ──────────────────────────────────────────────────────────── -->
+  <div id="view-today" class="view">
+    <div class="page-header">
+      <span class="page-title">💊 吃药提醒</span>
+    </div>
+    <div class="scroll-area" id="today-content"></div>
+  </div>
+
+  <!-- ── CALENDAR ───────────────────────────────────────────────────────── -->
+  <div id="view-calendar" class="view">
+    <div class="page-header">
+      <span class="page-title">打卡日历</span>
+    </div>
+    <div id="date-strip" class="date-strip"></div>
+    <div class="toggle-row">
+      <button class="toggle-btn active" data-action="toggle-group" data-mode="time">按时间段</button>
+      <button class="toggle-btn" data-action="toggle-group" data-mode="med">按药品</button>
+    </div>
+    <div class="scroll-area" id="calendar-content"></div>
+  </div>
+
+  <!-- ── MEDICATIONS ────────────────────────────────────────────────────── -->
+  <div id="view-meds" class="view">
+    <div class="page-header">
+      <span class="page-title">我的药品</span>
+      <button class="icon-btn" data-action="open-add-med" aria-label="添加药品">＋</button>
+    </div>
+    <div class="scroll-area" id="meds-content"></div>
+  </div>
+
+  <!-- ── SETTINGS ───────────────────────────────────────────────────────── -->
+  <div id="view-settings" class="view">
+    <div class="page-header">
+      <span class="page-title">设置</span>
+    </div>
+    <div class="scroll-area">
+      <div class="card">
+        <div class="card-title">提醒阈值</div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">库存不足提醒</div>
+            <div class="setting-hint">剩余天数低于此值时显示警告</div>
+          </div>
+          <div class="setting-val">
+            <input type="number" id="setting-stock-warn" min="1" max="30" value="3" />
+            <span>天</span>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">保质期临近提醒</div>
+            <div class="setting-hint">距到期天数低于此值时显示警告</div>
+          </div>
+          <div class="setting-val">
+            <input type="number" id="setting-expiry-warn" min="1" max="90" value="7" />
+            <span>天</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">本地通知</div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">服药提醒通知</div>
+            <div class="setting-hint">在服药时间推送本地通知</div>
+          </div>
+          <div class="setting-val">
+            <input type="checkbox" id="setting-notify" />
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">拍照识别增强（可选）</div>
+        <div class="setting-hint" style="margin-bottom:8px">调用大模型把说明书 OCR 文本整理成结构化用药方案，识别更准。需自行填写本人账号的接口地址与密钥，密钥只保存在本机。</div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">启用 LLM 解析</div>
+            <div class="setting-hint">关闭时仅使用本机规则解析</div>
+          </div>
+          <div class="setting-val">
+            <input type="checkbox" id="setting-llm" />
+          </div>
+        </div>
+        <div class="form-section" id="llm-fields" style="display:none">
+          <div class="form-label">快捷预设</div>
+          <select id="setting-llm-preset" class="form-select">
+            <option value="">自定义（手动填写）</option>
+            <option value="glm">智谱 GLM-4-Flash（官方免费）</option>
+            <option value="deepseek">DeepSeek（新用户送额度）</option>
+            <option value="qwen">通义千问（阿里云百炼送额度）</option>
+            <option value="siliconflow">硅基流动（注册送额度）</option>
+          </select>
+          <div class="form-label">接口地址（OpenAI 兼容）</div>
+          <input type="text" id="setting-llm-baseurl" class="form-input" placeholder="https://api.deepseek.com/v1" />
+          <div class="form-label">模型名称</div>
+          <input type="text" id="setting-llm-model" class="form-input" placeholder="deepseek-chat" />
+          <div class="form-label">API Key</div>
+          <input type="password" id="setting-llm-key" class="form-input" placeholder="sk-…" />
+          <div class="setting-hint">提醒：以上服务都需要在对应官网注册账号并领取 Key（部分有永久免费或赠送额度），Key 只保存在本机。识别入口在「添加药品」里。</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">数据备份</div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">导出全部数据</div>
+            <div class="setting-hint">药品、库存、打卡记录为 JSON 文件</div>
+          </div>
+        </div>
+        <button class="btn-secondary" style="width:100%;margin-bottom:8px" data-action="export-data">导出数据</button>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">导入数据</div>
+            <div class="setting-hint">从 JSON 备份恢复（覆盖当前数据）</div>
+          </div>
+        </div>
+        <input type="file" id="import-input" accept="application/json,.json" style="display:none" />
+        <button class="btn-secondary" style="width:100%" data-action="import-data">导入数据</button>
+      </div>
+
+      <button class="btn-primary" data-action="save-settings">保存设置</button>
+    </div>
+  </div>
+
+  <!-- ── Bottom Navigation ──────────────────────────────────────────────── -->
+  <nav class="nav-bar">
+    <button id="nav-today" class="nav-btn active" data-action="nav" data-view="today">
+      <span class="nav-icon">🏠</span>今日
+    </button>
+    <button id="nav-calendar" class="nav-btn" data-action="nav" data-view="calendar">
+      <span class="nav-icon">📅</span>日历
+    </button>
+    <button id="nav-meds" class="nav-btn" data-action="nav" data-view="meds">
+      <span class="nav-icon">💊</span>药品
+    </button>
+    <button id="nav-settings" class="nav-btn" data-action="nav" data-view="settings">
+      <span class="nav-icon">⚙️</span>设置
+    </button>
+  </nav>
+</div>
+
+<!-- ── Add/Edit Medication Sheet ──────────────────────────────────────────── -->
+<div id="overlay-med" class="overlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="sheet-med-title">添加药品</div>
+
+    <div class="card scan-card">
+      <div class="card-title">📷 说明书拍照识别（自动填写）</div>
+      <input type="file" id="scan-input" accept="image/*" capture="environment" style="display:none" />
+      <button class="btn-secondary" style="width:100%" data-action="start-scan">拍摄/选择说明书照片</button>
+      <div id="scan-engine" class="scan-engine" style="display:none"></div>
+      <div id="scan-status" class="scan-status" style="display:none"></div>
+      <div id="scan-result" class="scan-result" style="display:none"></div>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:16px">
+      <div>
+        <div class="form-label">药品照片（可选）</div>
+        <div id="photo-placeholder" class="photo-placeholder" data-action="take-photo">
+          <span class="ph-icon">📷</span><span>拍照留存</span>
+        </div>
+        <img id="photo-preview-img" class="photo-preview" src="" alt="" style="display:none" />
+        <input type="file" id="photo-input" accept="image/*" style="display:none" />
+      </div>
+      <div style="flex:1">
+        <div class="form-section">
+          <div class="form-label">药品名称 *</div>
+          <input type="text" id="f-name" class="form-input" placeholder="如：阿莫西林胶囊" />
+        </div>
+        <div class="form-section">
+          <div class="form-label">医嘱说明</div>
+          <input type="text" id="f-instructions" class="form-input" placeholder="如：饭后服用" />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-section">
+        <div class="form-label">疗程天数 *</div>
+        <input type="number" id="f-duration" class="form-input" min="1" placeholder="7" />
+      </div>
+      <div class="form-section">
+        <div class="form-label">每日次数 *</div>
+        <input type="number" id="f-times" class="form-input" min="1" max="8" placeholder="3" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-section">
+        <div class="form-label">每次用量 *</div>
+        <input type="number" id="f-dose" class="form-input" min="0.5" step="0.5" placeholder="1" />
+      </div>
+      <div class="form-section">
+        <div class="form-label">用量单位</div>
+        <select id="f-unit" class="form-select">
+          <option value="片">片</option>
+          <option value="粒">粒</option>
+          <option value="ml">ml</option>
+          <option value="mg">mg</option>
+          <option value="袋">袋</option>
+          <option value="支">支</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-label">开始日期</div>
+      <input type="date" id="f-start" class="form-input" />
+    </div>
+
+    <div class="form-section">
+      <div class="form-label">服药时间（可手动调整）</div>
+      <div id="f-times-list" class="times-list"></div>
+      <div class="form-hint">默认：上午 9:00 / 下午 13:00 / 晚上 18:00；修改每日次数会重新生成，也可逐个手动修改</div>
+    </div>
+
+    <button class="btn-primary" data-action="save-med">保存</button>
+    <button class="btn-secondary" style="width:100%;margin-top:10px" data-action="close-overlay" data-overlay="overlay-med">取消</button>
+  </div>
+</div>
+
+<!-- ── Medication Detail Sheet ────────────────────────────────────────────── -->
+<div id="overlay-med-detail" class="overlay">
+  <div class="sheet">
+    <div id="med-detail-content"></div>
+  </div>
+</div>
+
+<!-- ── Add/Edit Batch Sheet ───────────────────────────────────────────────── -->
+<div id="overlay-batch" class="overlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="sheet-batch-title">添加库存批次</div>
+    <input type="hidden" id="b-med-id" />
+    <div class="form-section">
+      <div class="form-label">数量（片/粒/ml）*</div>
+      <input type="number" id="b-qty" class="form-input" min="1" placeholder="如：24" />
+    </div>
+    <div class="form-section">
+      <div class="form-label">保质期 *</div>
+      <input type="date" id="b-expiry" class="form-input" />
+      <div class="form-hint">可随时修改，应对实际服用顺序与批次记录不一致的情况</div>
+    </div>
+    <button class="btn-primary" data-action="save-batch">保存</button>
+    <button class="btn-secondary" style="width:100%;margin-top:10px" data-action="close-overlay" data-overlay="overlay-batch">取消</button>
+  </div>
+</div>
+
+<script src="./vendor/ort.min.js"></script>
+<script src="./assets/utils.js"></script>
+<script src="./assets/store.js"></script>
+<script src="./assets/parser.js"></script>
+<script src="./assets/ocr.js"></script>
+<script src="./assets/app.js"></script>
+</body>
+</html>

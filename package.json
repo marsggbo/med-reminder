@@ -1,0 +1,35 @@
+{
+  "name": "med-reminder",
+  "version": "1.0.0",
+  "private": false,
+  "description": "离线优先的用药提醒 App(Android/PWA),内置中文 OCR 拍照解析说明书;Offline-first medication reminder with on-device Chinese OCR",
+  "scripts": {
+    "web:sync": "node scripts/sync-web.js",
+    "cap:sync": "npm run web:sync && npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/filesystem": "^8.1.3",
+    "@capacitor/local-notifications": "^8.3.1",
+    "onnxruntime-web": "^1.27.0"
+  },
+  "devDependencies": {
+    "pngjs": "^7.0.0"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marsggbo/med-reminder.git"
+  },
+  "keywords": [
+    "medication",
+    "reminder",
+    "ocr",
+    "pwa",
+    "capacitor",
+    "android",
+    "pp-ocr"
+  ]
+}

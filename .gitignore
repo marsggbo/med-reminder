@@ -1,0 +1,24 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Android / Gradle build output
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/captures/
+android/.kotlin/
+*.iml
+android/app/src/main/assets/public/
+
+# Executables (shipped via GitHub Releases)
+apk/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
